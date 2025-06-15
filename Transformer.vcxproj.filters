@@ -33,74 +33,74 @@
     <ClCompile Include="Transformer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\String.cpp">
+    <ClCompile Include="..\AutoGrad\KoAdd.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoCat.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoCrossEntropy.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoDiv.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoDot.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoDropout.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoExp.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoIndexSelect.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoLog.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoMaskedFill.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoMean.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoMul.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoPow.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoRelu.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoReshape.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoSlice.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoSub.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoSum.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoTranspose.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\NDAllocator.cpp">
       <Filter>Source Files\Autograd</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\Random.cpp">
+    <ClCompile Include="..\AutoGrad\NDThreadPool.cpp">
       <Filter>Source Files\Autograd</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\NDAllocator.cpp">
+    <ClCompile Include="..\AutoGrad\Random.cpp">
       <Filter>Source Files\Autograd</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\NDThreadPool.cpp">
+    <ClCompile Include="..\AutoGrad\String.cpp">
       <Filter>Source Files\Autograd</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoDot.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoCrossEntropy.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoAdd.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoCat.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoMul.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoDiv.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoMaskedFill.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoIndexSelect.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoReshape.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoSum.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoMean.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoRelu.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoSub.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoPow.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoExp.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoDropout.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoLog.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoTranspose.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\AutoGrad\KoSlice.cpp">
-      <Filter>Source Files\Autograd\Kernels</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -109,36 +109,6 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\AutoGrad\Tensor.h">
-      <Filter>Header Files\Autograd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\Random.h">
-      <Filter>Header Files\Autograd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\Embedding.h">
-      <Filter>Header Files\Autograd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\CrossEntropyLoss.h">
-      <Filter>Header Files\Autograd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\CategoricalDistribution.h">
-      <Filter>Header Files\Autograd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\Linear.h">
-      <Filter>Header Files\Autograd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\Sequential.h">
-      <Filter>Header Files\Autograd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\Model.h">
-      <Filter>Header Files\Autograd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\NDArray.h">
-      <Filter>Header Files\Autograd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\Dropout.h">
-      <Filter>Header Files\Autograd</Filter>
-    </ClInclude>
     <ClInclude Include="BigramLanguageModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -160,77 +130,107 @@
     <ClInclude Include="MultiHeadLanguageModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\NDShape.h">
-      <Filter>Header Files\Autograd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\String.h">
-      <Filter>Header Files\Autograd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\NDThreadPool.h">
-      <Filter>Header Files\Autograd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoAdd.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\Kernel.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoCrossEntropy.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoDot.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoCat.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoMul.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoDiv.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoMaskedFill.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoIndexSelect.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoMean.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoReshape.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoSum.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoRelu.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoSub.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoPow.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoExp.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoDropout.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoLog.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoTranspose.h">
-      <Filter>Header Files\Autograd\Kernels</Filter>
-    </ClInclude>
     <ClInclude Include="KoNotImplemented.h">
       <Filter>Header Files\Autograd\Kernels</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\AutoGrad\KoSlice.h">
+    <ClInclude Include="..\AutoGrad\KoAdd.h">
       <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoCat.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoCrossEntropy.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoDiv.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoDot.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoDropout.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoExp.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoIndexSelect.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoLog.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoMaskedFill.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoMean.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoMul.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoPow.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\Kernel.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoRelu.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoReshape.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoSlice.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoSub.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoSum.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoTranspose.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\CategoricalDistribution.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\Dropout.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\Linear.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\NDArray.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\String.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\Tensor.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\Model.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\Embedding.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\CrossEntropyLoss.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\NDShape.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\Random.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\NDThreadPool.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\Sequential.h">
+      <Filter>Header Files\Autograd</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
