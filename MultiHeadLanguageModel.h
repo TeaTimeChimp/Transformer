@@ -11,20 +11,18 @@ class MultiHeadLanguageModel : public Model
 	LinearPtr lm_head;
 
 public:
-	MultiHeadLanguageModel(const int vocab_size,const int n_embd,const int block_size,const FP dropout) :
+	MultiHeadLanguageModel(const int vocab_size,const int n_embd,const int n_head,const int n_layer,const int block_size,const FP dropout) :
 		_block_size(block_size),
 		token_embedding_table(Embedding::New(vocab_size,n_embd,"token_embedding_table")),
 		position_embedding_table(Embedding::New(block_size,n_embd,"position_embedding_table")),
-		blocks(Sequential::New(
-			{
-				Block::New(n_embd,4,block_size,dropout),
-				Block::New(n_embd,4,block_size,dropout),
-				Block::New(n_embd,4,block_size,dropout),
-				LayerNorm::New(n_embd)
-			})),
+		blocks(Sequential::New({})),
 		ffwd(FeedForward::New(n_embd,dropout)),
 		lm_head(Linear::New(n_embd,vocab_size,"lm_head"))
 	{
+		// Add layers to the model.
+		for(int i=0;i<n_layer;++i)
+			blocks->Add(Block::New(n_embd,n_head,block_size,dropout));
+		blocks->Add(LayerNorm::New(n_embd));
 	}
 
 	const std::vector<LayerPtr> GetLayers() const override

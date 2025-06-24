@@ -666,61 +666,76 @@ int main()
 
 	cout<<xb<<endl;	// Input to the transformer.
 
-	const int n_embd = 32;
-	const FP dropout = 0.2;
-	MultiHeadLanguageModel m(vocab_size,n_embd,block_size,dropout);
+	// Check model is working by using a test sequence and the seeded random initialization of model parameters.
 	{
+		const int n_embd = 32;
+		const int n_head = 4;	// Number of attention heads.
+		const int n_layer = 3;	// Number of transformer block layers.
+		const FP dropout = 0.2;
+		MultiHeadLanguageModel m(vocab_size,n_embd,n_head,n_layer,block_size,dropout);
 		m.SetMode(Layer::Mode::Training);
 		auto [logits,loss] = m.Forward(xb,yb);
 		cout<<logits->Shape()<<endl;
 		cout<<"Actual loss is "<<loss<<endl;
-		if(!loss->IsEqualTo(Tensor::New(NDData::New({},5.49829))))
+		if(!loss->IsEqualTo(Tensor::New(NDData::New({},6.41601))))
 		{
-			cout<<"Expected loss is 5.49829."<<endl;
+			cout<<"Expected loss is 6.41601."<<endl;
 			throw;
 		}
 		loss->Backward();
 	}
 
-	// Expected loss if probability of each character was equal. 
-	// Probability of each character = 1/65 (65 is vocab).
-	// Apply 'log' to avoid very small numbers when probabilities are multiplied.
-	// Negative because log will produce a -ve number for inputs between 0 and 1.
-	cout<<"Expected uniform loss is "<<-log(1.0/65.0)<<endl;
-
-	m.SetMode(Layer::Mode::Inference);
-	cout<<decode(ToList(m.Generate(Tensor::Zeros({1,block_size}),100)->Slice({{0}})))<<endl;
-
-	const int max_iters = 50000;
-	const int eval_interval = 500;
-	const double learning_rate = 3e-4;
-
-	// create a OyTorch optimizer.
-	cout<<"Model has "<<m.GetParameters().size()<<" parameters."<<endl;
-	ADAM optimizer(m.GetParameters(),learning_rate);
-
-	for(int iter=0;iter<max_iters;++iter)
 	{
-		if(iter%eval_interval==0)
+		// Model needs to be much larger to be any good
+		const int batch_size = 64;	// Number of sequences to process in parallel.
+		const int block_size = 256;	// Number of characters in the context.
+		const int n_embd = 384;		// Size of the embedding vector for each character.
+		const int n_head = 6;		// Number of attention heads.
+		const int n_layer = 6;		// Number of transformer blocks.
+		const FP dropout = 0.2;
+		MultiHeadLanguageModel m(vocab_size,n_embd,n_head,n_layer,block_size,dropout);
+
+
+		// Expected loss if probability of each character was equal. 
+		// Probability of each character = 1/65 (65 is vocab).
+		// Apply 'log' to avoid very small numbers when probabilities are multiplied.
+		// Negative because log will produce a -ve number for inputs between 0 and 1.
+		cout<<"Expected uniform loss is "<<-log(1.0/65.0)<<endl;
+
+		m.SetMode(Layer::Mode::Inference);
+		cout<<decode(ToList(m.Generate(Tensor::Zeros({1,block_size}),100)->Slice({{0}})))<<endl;
+
+		const int max_iters = 50000;
+		const int eval_interval = 500;
+		const double learning_rate = 3e-4;
+
+		// create a OyTorch optimizer.
+		cout<<"Model has "<<m.GetParameters().size()<<" parameters."<<endl;
+		ADAM optimizer(m.GetParameters(),learning_rate);
+
+		for(int iter=0;iter<max_iters;++iter)
 		{
-			auto[train_loss,val_loss] = estimate_loss(m,train_data,val_data,batch_size,block_size);
-			cout<<"step "<<iter<<": train loss "<<train_loss<<", val loss "<<val_loss<<"."<<endl;
-			cout<<decode(ToList(m.Generate(Tensor::Zeros({1,1}),500)->Slice({{0}})))<<endl;
+			if(iter%eval_interval==0)
+			{
+				auto[train_loss,val_loss] = estimate_loss(m,train_data,val_data,batch_size,block_size);
+				cout<<"step "<<iter<<": train loss "<<train_loss<<", val loss "<<val_loss<<"."<<endl;
+				cout<<decode(ToList(m.Generate(Tensor::Zeros({1,block_size}),100)->Slice({{0}})))<<endl;
+			}
+
+			// sample a batch of data.
+			auto [xb,yb] = get_batch(train_data,batch_size,block_size,false);
+
+			// evaluate the loss.
+			m.SetMode(Layer::Mode::Training);
+			auto [logits,loss] = m.Forward(xb,yb);
+			optimizer.ZeroGrad();
+			loss->Backward();
+			optimizer.Step();
+			cout<<loss<<endl;
 		}
 
-		// sample a batch of data.
-		auto [xb,yb] = get_batch(train_data,batch_size,block_size,false);
-
-		// evaluate the loss.
-		m.SetMode(Layer::Mode::Training);
-		auto [logits,loss] = m.Forward(xb,yb);
-		optimizer.ZeroGrad();
-		loss->Backward();
-		optimizer.Step();
-		//cout<<loss<<endl;
+		cout<<decode(ToList(m.Generate(Tensor::Zeros({1,1}),500)->Slice({{0}})))<<endl;
 	}
-
-	cout<<decode(ToList(m.Generate(Tensor::Zeros({1,1}),500)->Slice({{0}})))<<endl;
 
 	return 0;
 }
