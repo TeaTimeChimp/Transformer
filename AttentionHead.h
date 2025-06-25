@@ -65,7 +65,7 @@ public:
 		
 		// Scale values to bring variance back to 1 to avoid excessive sharpening by softmax.
 		// This is done by multiplying by the square root of the number of inputs.
-		wei = wei->Mul(Tensor::New(NDData::New({},pow(k->Shape()[2],-0.5))));						// (B,T,T)
+		wei = wei->Mul(Tensor::New(NDData::New({},pow(FP(k->Shape()[2]),FP(-0.5)))));				// (B,T,T)
 		//print(wei->Shape());
 		//wei->Print();
 

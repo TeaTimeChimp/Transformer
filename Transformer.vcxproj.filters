@@ -102,6 +102,12 @@
     <ClCompile Include="..\AutoGrad\String.cpp">
       <Filter>Source Files\Autograd</Filter>
     </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoMax.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AutoGrad\KoArgMax.cpp">
+      <Filter>Source Files\Autograd\Kernels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Data\input.txt">
@@ -231,6 +237,15 @@
     </ClInclude>
     <ClInclude Include="..\AutoGrad\Sequential.h">
       <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\NDAllocator.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\DType.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\KoMax.h">
+      <Filter>Header Files\Autograd\Kernels</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
