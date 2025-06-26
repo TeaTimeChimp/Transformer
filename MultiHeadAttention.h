@@ -44,6 +44,14 @@ public:
 		for(auto& head:_heads)
 			y.emplace_back(head->Forward(x));
 
+		/* TODO: Investigate thread-safety.
+		std::vector<TensorPtr> y(_heads.size());
+		pool.foreach(0,(int)_heads.size(),[&](const int i)
+		{
+			y[i] = _heads[i]->Forward(x);
+		});
+		*/
+
 		// Concatenate head outputs.
 		TensorPtr out = Tensor::Cat(y,-1);
 

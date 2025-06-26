@@ -220,6 +220,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\AutoGrad\KoAdd.cpp" />
+    <ClCompile Include="..\AutoGrad\KoArgMax.cpp" />
     <ClCompile Include="..\AutoGrad\KoCat.cpp" />
     <ClCompile Include="..\AutoGrad\KoCrossEntropy.cpp" />
     <ClCompile Include="..\AutoGrad\KoDiv.cpp" />
@@ -229,6 +230,7 @@
     <ClCompile Include="..\AutoGrad\KoIndexSelect.cpp" />
     <ClCompile Include="..\AutoGrad\KoLog.cpp" />
     <ClCompile Include="..\AutoGrad\KoMaskedFill.cpp" />
+    <ClCompile Include="..\AutoGrad\KoMax.cpp" />
     <ClCompile Include="..\AutoGrad\KoMean.cpp" />
     <ClCompile Include="..\AutoGrad\KoMul.cpp" />
     <ClCompile Include="..\AutoGrad\KoPow.cpp" />
@@ -251,6 +253,7 @@
     <ClInclude Include="..\AutoGrad\CategoricalDistribution.h" />
     <ClInclude Include="..\AutoGrad\CrossEntropyLoss.h" />
     <ClInclude Include="..\AutoGrad\Dropout.h" />
+    <ClInclude Include="..\AutoGrad\DType.h" />
     <ClInclude Include="..\AutoGrad\Embedding.h" />
     <ClInclude Include="..\AutoGrad\Kernel.h" />
     <ClInclude Include="..\AutoGrad\KoAdd.h" />
@@ -263,6 +266,7 @@
     <ClInclude Include="..\AutoGrad\KoIndexSelect.h" />
     <ClInclude Include="..\AutoGrad\KoLog.h" />
     <ClInclude Include="..\AutoGrad\KoMaskedFill.h" />
+    <ClInclude Include="..\AutoGrad\KoMax.h" />
     <ClInclude Include="..\AutoGrad\KoMean.h" />
     <ClInclude Include="..\AutoGrad\KoMul.h" />
     <ClInclude Include="..\AutoGrad\KoPow.h" />
@@ -274,6 +278,7 @@
     <ClInclude Include="..\AutoGrad\KoTranspose.h" />
     <ClInclude Include="..\AutoGrad\Linear.h" />
     <ClInclude Include="..\AutoGrad\Model.h" />
+    <ClInclude Include="..\AutoGrad\NDAllocator.h" />
     <ClInclude Include="..\AutoGrad\NDArray.h" />
     <ClInclude Include="..\AutoGrad\NDShape.h" />
     <ClInclude Include="..\AutoGrad\NDThreadPool.h" />

@@ -64,11 +64,12 @@ ostream& operator << (ostream& os,const TensorPtr& tensor)
 // Vector of values.
 TensorPtr Tensor(const std::vector<int>& data)
 {
-	std::vector<double> r(data.size());
+	std::vector<FP> r(data.size());
 	for(size_t i=0;i<data.size();++i)
-		r[i] = (double)data[i];
+		r[i] = FP(data[i]);
 	return Tensor::New(NDData::New({(int)r.size()},r));
 }
+
 
 vector<int> ToList(const TensorPtr& tensor)
 {
@@ -537,7 +538,7 @@ void Aside_ScaledDotProductAttention()
 	print(wei->Var());		// Variance ~16.
 
 	// ...applying the scaling factor...
-	wei = wei->Div(Tensor::New(NDData::New({},sqrt(16))));
+	wei = wei->Div(Tensor::New(NDData::New({},sqrt(16.0f))));
 	print(wei->Var());		// Variance ~1.
 
 	// Why is this important?
@@ -546,10 +547,10 @@ void Aside_ScaledDotProductAttention()
 	// single (fewer) other tokens of interest.
 
 	// Diffuse example (good)...
-	print(Tensor::New(NDData::New({5},{0.1,-0.2,0.3,-0.2,0.5}))->Softmax(-1));
+	print(Tensor::New(NDData::New({5},{0.1f,-0.2f,0.3f,-0.2f,0.5f}))->Softmax(-1));
 
 	// Extreme example (bad)...
-	print(Tensor::New(NDData::New({5},{0.1,-0.2,0.3,-0.2,0.5})*8)->Softmax(-1));
+	print(Tensor::New(NDData::New({5},{0.1f,-0.2f,0.3f,-0.2f,0.5f})*8)->Softmax(-1));
 
 	// ...softmax will eventually converge on a single value, the maximum value.
 
@@ -671,15 +672,24 @@ int main()
 		const int n_embd = 32;
 		const int n_head = 4;	// Number of attention heads.
 		const int n_layer = 3;	// Number of transformer block layers.
-		const FP dropout = 0.2;
+		const FP dropout = FP(0.2);
 		MultiHeadLanguageModel m(vocab_size,n_embd,n_head,n_layer,block_size,dropout);
 		m.SetMode(Layer::Mode::Training);
 		auto [logits,loss] = m.Forward(xb,yb);
 		cout<<logits->Shape()<<endl;
 		cout<<"Actual loss is "<<loss<<endl;
-		if(!loss->IsEqualTo(Tensor::New(NDData::New({},6.41601))))
+
+		// This is an arbitrary value that depends on random number generation.
+		// Anything that changes may mean this number changes too.
+		// It's just a check for  unexpected changes.
+		// Things that may trigger a change include...
+		//   - FP definition double or float.
+		//   - Creation/initialization order of layers.
+		//   - Any non-determinate parallelism e.g. parallel heads due to dropout.
+		const FP expected_loss = FP(5.97109);
+		if(!loss->IsEqualTo(Tensor::New(NDData::New({},expected_loss))))
 		{
-			cout<<"Expected loss is 6.41601."<<endl;
+			cout<<"Expected loss is "<<expected_loss<<"."<<endl;
 			throw;
 		}
 		loss->Backward();
@@ -692,7 +702,7 @@ int main()
 		const int n_embd = 384;		// Size of the embedding vector for each character.
 		const int n_head = 6;		// Number of attention heads.
 		const int n_layer = 6;		// Number of transformer blocks.
-		const FP dropout = 0.2;
+		const FP dropout = FP(0.2);
 		MultiHeadLanguageModel m(vocab_size,n_embd,n_head,n_layer,block_size,dropout);
 
 
@@ -707,9 +717,9 @@ int main()
 
 		const int max_iters = 50000;
 		const int eval_interval = 500;
-		const double learning_rate = 3e-4;
+		const FP learning_rate = FP(3e-4);
 
-		// create a OyTorch optimizer.
+		// create an optimizer.
 		cout<<"Model has "<<m.GetParameters().size()<<" parameters."<<endl;
 		ADAM optimizer(m.GetParameters(),learning_rate);
 
