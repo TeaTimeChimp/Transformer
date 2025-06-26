@@ -250,6 +250,7 @@
     <Text Include="Data\input.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\AutoGrad\ADAM.h" />
     <ClInclude Include="..\AutoGrad\CategoricalDistribution.h" />
     <ClInclude Include="..\AutoGrad\CrossEntropyLoss.h" />
     <ClInclude Include="..\AutoGrad\Dropout.h" />

@@ -247,5 +247,8 @@
     <ClInclude Include="..\AutoGrad\KoMax.h">
       <Filter>Header Files\Autograd\Kernels</Filter>
     </ClInclude>
+    <ClInclude Include="..\AutoGrad\ADAM.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
