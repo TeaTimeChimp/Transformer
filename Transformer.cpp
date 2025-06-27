@@ -741,7 +741,7 @@ int main()
 			optimizer.ZeroGrad();
 			loss->Backward();
 			optimizer.Step();
-			cout<<loss<<endl;
+			cout<<iter<<"="<<loss<<endl;
 		}
 
 		cout<<decode(ToList(m.Generate(Tensor::Zeros({1,1}),500)->Slice({{0}})))<<endl;
