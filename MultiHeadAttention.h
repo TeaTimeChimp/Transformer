@@ -42,10 +42,10 @@ public:
 		// Pass x through each head independently.
 		std::vector<TensorPtr> y(_heads.size());
 		/*
-		for(auto& head:_heads)
-			y.emplace_back(head->Forward(x));
-		*/		
-		pool.foreach(0,(int)_heads.size(),[&](const int i)
+		for(int i=0;i<_heads.size();++i)
+			y[i] = _heads[i]->Forward(x);
+		*/
+		NDThreadPool::ForEach(0,(int)_heads.size(),[&](const int i)
 		{
 			y[i] = _heads[i]->Forward(x);
 		});
