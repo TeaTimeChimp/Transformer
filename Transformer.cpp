@@ -319,7 +319,7 @@ void Aside_TheMathematicalTrickInSelfAttention()
 	print(x);
 
 	// Very weak/lossy average of previous values - loses positional information.
-	// Ww eant x[b,t] = mean_{i<=t} x[b,i]
+	// We want x[b,t] = mean_{i<=t} x[b,i]
 	TensorPtr xbow = Tensor::New(NDData::Zeros({B,T,C}));
 	for(int b=0;b<B;++b)
 	{
@@ -341,11 +341,11 @@ void Aside_TheMathematicalTrickInSelfAttention()
 	cout<<xbow->Shape()<<endl;
 	print(xbow);
 
-	// See how first row of x and xbow are the same, but then xbow differs because it the average over all previous rows in x.
+	// See how first row of x and xbow are the same, but then xbow differs because it's the average over all previous rows in x.
 	print(x->Slice({{0}}));
 	print(xbow->Slice({{0}}));
 
-	// Using a loop is slow, and this can be achieve using matrix multiplication.
+	// Using a loop is slow, and this can be achieved using matrix multiplication.
 
 	// This shows how you can 'sum' vertically over rows of 'b' by multipling by 1s.
 	TensorPtr a = Tensor::New(NDData::New({3,3},1.0));
@@ -553,8 +553,8 @@ void Aside_ScaledDotProductAttention()
 	print(Tensor::New(NDData::New({5},{0.1f,-0.2f,0.3f,-0.2f,0.5f})*8)->Softmax(-1));
 
 	// ...softmax will eventually converge on a single value, the maximum value.
-
 }
+
 
 void CheckGradient(const TensorPtr& p,const string& filename,const bool transpose=false)
 {
@@ -645,6 +645,8 @@ int main()
 
 	const int batch_size = 32;
 
+	// Input and Target are both block_size sequences of character indexes.
+	// Each character in Target is the expected output for the Input at the same position.
 	auto [xb,yb] = get_batch(train_data,batch_size,block_size,true);
 	cout<<"inputs:"<<endl;
 	cout<<xb->Shape()<<endl;
