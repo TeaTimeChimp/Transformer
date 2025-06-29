@@ -289,6 +289,7 @@
     <ClInclude Include="..\AutoGrad\Sequential.h" />
     <ClInclude Include="..\AutoGrad\String.h" />
     <ClInclude Include="..\AutoGrad\Tensor.h" />
+    <ClInclude Include="..\AutoGrad\TiledMatMul.h" />
     <ClInclude Include="BigramLanguageModel.h" />
     <ClInclude Include="AttentionBlock.h" />
     <ClInclude Include="FeedForward.h" />

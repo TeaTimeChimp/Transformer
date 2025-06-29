@@ -250,5 +250,8 @@
     <ClInclude Include="..\AutoGrad\ADAM.h">
       <Filter>Header Files\Autograd</Filter>
     </ClInclude>
+    <ClInclude Include="..\AutoGrad\TiledMatMul.h">
+      <Filter>Header Files\Autograd</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
