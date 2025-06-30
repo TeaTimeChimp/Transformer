@@ -264,42 +264,42 @@ public:
 };
 
 
-double Mean(const vector<TensorPtr>& values)
+FP Mean(const vector<FP>& values)
 {
-	double count = 0.0;
-	double sum = 0.0;
+	FP count = 0.0;
+	FP sum = 0.0;
 	for(auto t:values)
 	{
-		sum += t->Mean(false)->Data()[{}];
+		sum += t;
 		++count;
 	}
 	return sum/count;
 }
 
 
-tuple<double,double> estimate_loss(Model& model,const TensorPtr& train_data,const TensorPtr& val_data,const int batch_size,const int block_size)
+tuple<FP,FP> estimate_loss(Model& model,const TensorPtr& train_data,const TensorPtr& val_data,const int batch_size,const int block_size)
 {
 	const int eval_iters = 200;
 
 	model.SetMode(Layer::Mode::Inference);
 
-	vector<TensorPtr> losses;
+	vector<FP> losses;
 	for(int i=0;i<eval_iters;++i)
 	{
 		auto [X,Y] = get_batch(train_data,batch_size,block_size,false);
 		auto [logits,loss] = model(X,Y);
-		losses.emplace_back(loss);
+		losses.emplace_back(loss->Item());
 	}
-	const double training_loss = Mean(losses);
+	const FP training_loss = Mean(losses);
 
 	losses.clear();
 	for(int i=0;i<eval_iters;++i)
 	{
 		auto [X,Y] = get_batch(val_data,batch_size,block_size,false);
 		auto [logits,loss] = model(X,Y);
-		losses.emplace_back(loss);
+		losses.emplace_back(loss->Item());
 	}
-	const double validation_loss = Mean(losses);
+	const FP validation_loss = Mean(losses);
 
 	return tuple(training_loss,validation_loss);
 }
