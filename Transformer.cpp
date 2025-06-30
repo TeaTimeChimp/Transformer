@@ -576,6 +576,15 @@ void CheckGradient(const TensorPtr& p,const string& filename,const bool transpos
 }
 
 
+int SumParameters(const vector<TensorPtr>& parameters)
+{
+	int sum = 0;
+	for(const auto& p:parameters)
+		sum += p->Data().Size();
+	return sum;
+}
+
+
 int main()
 {
 	// Asides/Concepts.
@@ -722,7 +731,7 @@ int main()
 		const FP learning_rate = FP(3e-4);
 
 		// create an optimizer.
-		cout<<"Model has "<<m.GetParameters().size()<<" parameters."<<endl;
+		cout<<"Model has "<<SumParameters(m.GetParameters())<<" parameters."<<endl;
 		ADAM optimizer(m.GetParameters(),learning_rate);
 
 		for(int iter=0;iter<max_iters;++iter)
