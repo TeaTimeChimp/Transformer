@@ -58,7 +58,7 @@ public:
 		TensorPtr pos_emb = position_embedding_table->Forward(Tensor::New(NDData::Arrange(T)));		// (T,n_embd)
 		//print(pos_emb);
 
-		// Add the positional embeddings to the token embeddings to give weight to token positon.
+		// Add the positional embeddings to the token embeddings to give weight to token position.
 		TensorPtr x = tok_emb->Add(pos_emb);														// (B,T,n_embd)
 		//print(x);
 
