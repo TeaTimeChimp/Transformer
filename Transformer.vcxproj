@@ -80,6 +80,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 13.0.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -159,6 +160,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <StackReserveSize>2097152</StackReserveSize>
     </Link>
+    <CudaCompile>
+      <Include>$(ProjectDir)\..\Autograd\CUDA</Include>
+    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -189,6 +193,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <StackReserveSize>2097152</StackReserveSize>
     </Link>
+    <CudaCompile>
+      <Include>
+      </Include>
+    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
     <ClCompile>
@@ -255,6 +263,8 @@
     <ClInclude Include="..\AutoGrad\ADAM.h" />
     <ClInclude Include="..\AutoGrad\CategoricalDistribution.h" />
     <ClInclude Include="..\AutoGrad\CrossEntropyLoss.h" />
+    <ClInclude Include="..\AutoGrad\CUDA\helper_cuda.h" />
+    <ClInclude Include="..\AutoGrad\CUDA\helper_string.h" />
     <ClInclude Include="..\AutoGrad\Dropout.h" />
     <ClInclude Include="..\AutoGrad\DType.h" />
     <ClInclude Include="..\AutoGrad\Embedding.h" />
@@ -299,7 +309,11 @@
     <ClInclude Include="MultiHeadAttention.h" />
     <ClInclude Include="MultiHeadLanguageModel.h" />
   </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\AutoGrad\CUDA\matrixMul.cu" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 13.0.targets" />
   </ImportGroup>
 </Project>

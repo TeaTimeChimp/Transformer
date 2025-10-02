@@ -28,6 +28,12 @@
     <Filter Include="Source Files\Autograd\Kernels">
       <UniqueIdentifier>{5fa15c59-93eb-4774-8d37-e007124e4d27}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Autograd\CUDA">
+      <UniqueIdentifier>{ed9e49bb-1d24-4368-aa8a-c66453e26d8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Autograd\CUDA">
+      <UniqueIdentifier>{f850b842-f702-40fd-9a64-4c994a7903d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Transformer.cpp">
@@ -253,5 +259,16 @@
     <ClInclude Include="..\AutoGrad\TiledMatMul.h">
       <Filter>Header Files\Autograd</Filter>
     </ClInclude>
+    <ClInclude Include="..\AutoGrad\CUDA\helper_cuda.h">
+      <Filter>Header Files\Autograd\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\CUDA\helper_string.h">
+      <Filter>Header Files\Autograd\CUDA</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\AutoGrad\CUDA\matrixMul.cu">
+      <Filter>Source Files\Autograd\CUDA</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>
