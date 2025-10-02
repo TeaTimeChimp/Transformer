@@ -161,7 +161,8 @@
       <StackReserveSize>2097152</StackReserveSize>
     </Link>
     <CudaCompile>
-      <Include>$(ProjectDir)\..\Autograd\CUDA</Include>
+      <Include>
+      </Include>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
