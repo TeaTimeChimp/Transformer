@@ -32,7 +32,7 @@ public:
 	const Tensors Forward(const TensorPtr& x) const override
 	{
 		TensorPtr xmean = x->Mean(1,true);
-		TensorPtr xvar = x->Var(1,true);
+		TensorPtr xvar = x->Var(1,true,0);	// Bessel correction=0 else produces NaN for dimension length 1.
 		TensorPtr xhat = x->Sub(xmean)->Div(xvar->Add(_eps)->Sqrt());
 		TensorPtr out = _gamma->Mul(xhat)->Add(_beta);
 		return out;
