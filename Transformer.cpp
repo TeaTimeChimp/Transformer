@@ -742,7 +742,7 @@ int main()
 			{
 				auto[train_loss,val_loss] = estimate_loss(m,train_data,val_data,batch_size,block_size);
 				cout<<"step "<<iter<<": train loss "<<train_loss<<", val loss "<<val_loss<<"."<<endl;
-				cout<<decode(ToList(m.Generate(Tensor::Zeros({1,block_size}),100)->Slice({{0}})))<<endl;
+				cout<<decode(ToList(m.Generate(Tensor::Zeros({1,1}),100)->Slice({{0}})))<<endl;
 			}
 
 			// sample a batch of data.
