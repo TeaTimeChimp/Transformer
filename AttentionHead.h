@@ -62,6 +62,7 @@ public:
 		// Each token gets to interact with all tokens in previous timesteps (actually all timesteps tbut the future token are about to be zeroed).
 		TensorPtr wei = q->Dot(k->Transpose());														// (B,T,H) @ (B,H,T) = (B,T,T)
 		//wei->Print();
+		_ASSERT(wei->Shape()[0]==B&&wei->Shape()[1]==T&&wei->Shape()[2]==T);
 		
 		// Scale values to bring variance back to 1 to avoid excessive sharpening by softmax.
 		// This is done by multiplying by the square root of the number of inputs.
@@ -70,7 +71,7 @@ public:
 		//wei->Print();
 
 		// Mask lower left to avoid communication from tokens in later timesteps.
-		wei = wei->MaskedFill(itril,-std::numeric_limits<FP>::infinity());							// (B,T,T)
+		wei = wei->MaskedFill(itril->Slice({{0,T},{0,T}}),-std::numeric_limits<FP>::infinity());							// (B,T,T)
 		//wei->Print();
 
 		// Normalise rows. Eliminates negatives and rows sum to 1 which can be used as weighting.
