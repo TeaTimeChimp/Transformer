@@ -723,8 +723,10 @@ int main()
 		// Negative because log will produce a -ve number for inputs between 0 and 1.
 		cout<<"Expected uniform loss is "<<-log(1.0/65.0)<<endl;
 
+		// Generate text from the model.
+		// Start token is '0' (new line), since there's no 'start' token this is reasonable - batch size 1 with 1 timestep (B,T).
 		m.SetMode(Layer::Mode::Inference);
-		cout<<decode(ToList(m.Generate(Tensor::Zeros({1,block_size}),100)->Slice({{0}})))<<endl;
+		cout<<decode(ToList(m.Generate(Tensor::Zeros({1,1}),100)->Slice({{0}})))<<endl;
 
 		const int max_iters = 50000;
 		const int eval_interval = 500;
