@@ -182,6 +182,7 @@ class GptModel : public LanguageModel
 		c.relu2 = o.Str("act","gelu")=="relu2";
 		c.zeroProj = o.Int("zero_proj",0)!=0;
 		c.dropout = FP(o.Dbl("dropout",0.0));
+		c.lstmFront = o.Int("lstm_front",0)!=0;
 		c.seed = o.Int("init_seed",1);
 		return c;
 	}
@@ -192,7 +193,7 @@ public:
 	{
 		const GptConfig c = Config(vocab,o);
 		_desc = "gpt n_embd="+to_string(c.embd)+" n_head="+to_string(c.heads)+" n_layer="+to_string(c.layers)+" block="+to_string(c.block)
-			+" mlp="+to_string(c.mlpMult)+" tied="+to_string(c.tied)+" rope="+to_string(c.rope)+" act="+(c.relu2?"relu2":"gelu")+" zero_proj="+to_string(c.zeroProj)+" dropout="+to_string(c.dropout);
+			+" mlp="+to_string(c.mlpMult)+" tied="+to_string(c.tied)+" rope="+to_string(c.rope)+" act="+(c.relu2?"relu2":"gelu")+" zero_proj="+to_string(c.zeroProj)+" dropout="+to_string(c.dropout)+" lstm_front="+to_string(c.lstmFront);
 	}
 	Model& Net() override { return _net; }
 	int ContextLength() const override { return _net.ContextLength(); }

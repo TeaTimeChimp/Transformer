@@ -147,6 +147,7 @@ struct GptConfig
 	bool	relu2 = false;			// ReLU^2 MLP activation instead of GELU.
 	bool	zeroProj = false;		// Zero-initialise residual output projections (each block starts as identity).
 	FP		dropout = 0;			// Dropout on the embedding and each residual branch (training only).
+	bool	lstmFront = false;		// Hybrid: an LSTM layer (width embd) between the embedding and the attention blocks.
 	int		seed = 1;
 };
 
@@ -163,6 +164,7 @@ class GptNet : public Model
 	ParameterSetPtr		_p;
 	const GptConfig		_c;
 	TensorPtr			_tok,_pos,_lnfg,_lnfb,_head,_headb;
+	TensorPtr			_lWx,_lWh,_lb;		// Optional front LSTM.
 	std::vector<Layer_>	_blocks;
 	bool				_training = false;
 
@@ -188,8 +190,18 @@ public:
 		const double std = 0.02;
 		const double projStd = c.zeroProj?0.0:0.02/std::sqrt(2.0*c.layers);	// GPT-2: scale residual projections by depth.
 		_tok = _p->Normal("tok",{c.vocab,embd},std,gen);
-		if(!c.rope)
+		if(!c.rope&&!c.lstmFront)
 			_pos = _p->Normal("pos",{c.block,embd},std,gen);
+		if(c.lstmFront)
+		{
+			const double k = 1.0/std::sqrt((double)embd);
+			_lWx = _p->Uniform("front.Wx",{embd,4*embd},k,gen);
+			_lWh = _p->Uniform("front.Wh",{embd,4*embd},k,gen);
+			_lb = _p->Constant("front.b",{4*embd},FP(0));
+			FP* b = _lb->Data().Raw();
+			for(int j=embd;j<2*embd;++j)
+				b[j] = FP(1);
+		}
 		for(int l=0;l<c.layers;++l)
 		{
 			const std::string n = "h"+std::to_string(l)+".";
@@ -230,6 +242,8 @@ public:
 		const int T = idx->Shape()[1];
 		_ASSERT(T<=_c.block);
 		TensorPtr x = Drop(op::Embedding(_tok,_pos,idx));							// (B,T,C) token (+ position)
+		if(_lWx)
+			x = Drop(op::LSTM(x,_lWx,_lWh,_lb));									// Hybrid: recurrent front end
 		for(const Layer_& b:_blocks)
 		{
 			TensorPtr h = op::LayerNorm(x,b.ln1g,b.ln1b);
