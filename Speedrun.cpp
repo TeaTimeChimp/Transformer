@@ -376,6 +376,21 @@ string Sample(LanguageModel& lm,const Dataset& ds,const int n,mt19937& gen,const
 // Scales all gradients so their combined L2 norm is at most maxNorm. Returns the norm before clipping.
 double ClipGlobalNorm(const vector<TensorPtr>& params,const double maxNorm)
 {
+#ifdef AUTOGRAD_CUDA
+	if(NDConfig::useGpu)
+	{
+		double sq = 0.0;
+		for(auto& p:params)
+			if(p->Gradient())
+				sq += dev::SumSquares(p->Gradient()->Data().Dev(),p->Data().Size());
+		const double norm = sqrt(sq);
+		if(maxNorm>0.0&&norm>maxNorm)
+			for(auto& p:params)
+				if(p->Gradient())
+					dev::Scale(p->Gradient()->Data().DevModify(),FP(maxNorm/norm),p->Data().Size());
+		return norm;
+	}
+#endif
 	double sq = 0.0;
 	for(auto& p:params)
 		if(p->Gradient())
@@ -528,6 +543,51 @@ int Train(const Dataset& ds,const Options& o,const bool profile)
 }
 
 
+// Runs one forward/backward on the CPU and on the GPU from identical initial weights and compares loss and gradients.
+int DevCheck(const Dataset& ds,const Options& o)
+{
+	mt19937 gen(77);
+	const int T = o.Int("block",64);
+	auto [x,y] = Dataset::Batch(ds.train,o.Int("batch",8),T,gen);
+	vector<vector<FP>> grads[2];
+	double loss[2];
+	for(int d=0;d<2;++d)
+	{
+		NDConfig::useGpu = d==1;
+		auto lm = MakeModel(ds.VocabSize(),o);
+		lm->Net().SetMode(Layer::Mode::Training);
+		TensorPtr l = lm->Loss(x,y);
+		l->Backward();
+		loss[d] = l->Item();
+		for(auto& p:lm->Net().GetParameters())
+		{
+			const FP* g = p->Gradient()->Data().Raw();
+			grads[d].emplace_back(g,g+p->Data().Size());
+		}
+	}
+	NDConfig::useGpu = false;
+	cout<<"loss cpu "<<loss[0]<<" gpu "<<loss[1]<<endl;
+	double worst = 0.0;
+	for(size_t i=0;i<grads[0].size();++i)
+	{
+		double num = 0.0,den = 0.0;
+		for(size_t j=0;j<grads[0][i].size();++j)
+		{
+			const double a = grads[0][i][j],b = grads[1][i][j];
+			num += (a-b)*(a-b);
+			den += a*a;
+		}
+		const double rel = sqrt(num/(den+1e-30));
+		worst = max(worst,rel);
+		if(rel>1e-3)
+			cout<<"param "<<i<<" relative gradient difference "<<rel<<endl;
+	}
+	const bool ok = fabs(loss[0]-loss[1])<1e-4&&worst<1e-3;
+	cout<<"devcheck: worst relative gradient difference "<<worst<<(ok?"  PASS":"  FAIL")<<endl;
+	return ok?0:1;
+}
+
+
 // Checks the packed GEMM against the reference implementation and measures throughput.
 int GemmTest(const Options& o)
 {
@@ -583,6 +643,15 @@ int main(int argc,char** argv)
 		cout<<"dataset: "<<ds.text.size()<<" chars, vocab "<<ds.VocabSize()<<", train "<<ds.train.size()<<", val "<<ds.val.size()<<endl;
 
 		NDConfig::useGpu = o.Str("device","cpu")=="gpu";
+#ifdef AUTOGRAD_CUDA
+		if(NDConfig::useGpu&&!dev::Available())
+			throw runtime_error("No CUDA device.");
+#endif
+		cout<<"device: "<<(NDConfig::useGpu?"gpu":"cpu")<<endl;
+#ifdef AUTOGRAD_CUDA
+		if(o.mode=="devcheck")
+			return DevCheck(ds,o);
+#endif
 		if(o.mode=="gemmtest")
 			return GemmTest(o);
 		if(o.mode=="gradcheck")

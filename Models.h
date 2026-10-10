@@ -52,6 +52,13 @@ namespace op
 		return Tensor::New(true,{x,Wx,Wh,b},std::make_shared<KoLSTM>());
 	}
 
+	inline TensorPtr Embedding(const TensorPtr& tok,const TensorPtr& pos,const TensorPtr& idx)
+	{
+		if(pos)
+			return Tensor::New(true,{tok,pos},std::make_shared<KoEmbedding>(idx->Data()));
+		return Tensor::New(true,{tok},std::make_shared<KoEmbedding>(idx->Data()));
+	}
+
 	inline TensorPtr CrossEntropy(const TensorPtr& logits,const TensorPtr& targets)
 	{
 		return Tensor::New(true,{logits},std::make_shared<KoSoftmaxCrossEntropy>(targets->Data()));
@@ -193,9 +200,7 @@ public:
 	{
 		const int T = idx->Shape()[1];
 		_ASSERT(T<=_c.block);
-		TensorPtr x = _tok->IndexSelect(idx);										// (B,T,C)
-		if(_pos)
-			x = x->Add(T==_c.block?_pos:_pos->Slice({{0,T}}));						// (B,T,C) + (T,C)
+		TensorPtr x = op::Embedding(_tok,_pos,idx);									// (B,T,C) token (+ position)
 		for(const Layer_& b:_blocks)
 		{
 			TensorPtr h = op::LayerNorm(x,b.ln1g,b.ln1b);
@@ -268,7 +273,7 @@ public:
 
 	const Tensors Forward(const TensorPtr& idx) const override
 	{
-		TensorPtr x = _tok->IndexSelect(idx);				// (B,T,E)
+		TensorPtr x = op::Embedding(_tok,nullptr,idx);		// (B,T,E)
 		for(const Layer_& L:_layers)
 			x = op::LSTM(x,L.Wx,L.Wh,L.b);					// (B,T,H)
 		return op::Linear(x,_head,_headb);					// (B,T,V)
