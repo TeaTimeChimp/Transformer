@@ -8,6 +8,7 @@
 #include "..\AutoGrad\CrossEntropyLoss.h"
 #include "..\AutoGrad\CategoricalDistribution.h"
 #include "..\AutoGrad\ADAM.h"
+#include "..\AutoGrad\Muon.h"
 #include "..\AutoGrad\Linear.h"
 #include "..\AutoGrad\Sequential.h"
 #include "..\AutoGrad\Dropout.h"
@@ -166,12 +167,51 @@ class GptModel : public LanguageModel
 {
 	GptNet	_net;
 	string	_desc;
+
+	static GptConfig Config(const int vocab,const Options& o)
+	{
+		GptConfig c;
+		c.vocab = vocab;
+		c.embd = o.Int("n_embd",128);
+		c.heads = o.Int("n_head",4);
+		c.layers = o.Int("n_layer",4);
+		c.block = o.Int("block",128);
+		c.mlpMult = o.Int("mlp",4);
+		c.tied = o.Int("tied",0)!=0;
+		c.rope = o.Int("rope",0)!=0;
+		c.relu2 = o.Str("act","gelu")=="relu2";
+		c.zeroProj = o.Int("zero_proj",0)!=0;
+		c.seed = o.Int("init_seed",1);
+		return c;
+	}
+
 public:
 	GptModel(const int vocab,const Options& o) :
-		_net(vocab,o.Int("n_embd",128),o.Int("n_head",4),o.Int("n_layer",4),o.Int("block",128),o.Int("tied",0)!=0,o.Int("mlp",4),o.Int("init_seed",1))
+		_net(Config(vocab,o))
 	{
-		_desc = "gpt n_embd="+to_string(o.Int("n_embd",128))+" n_head="+to_string(o.Int("n_head",4))+" n_layer="+to_string(o.Int("n_layer",4))
-			+" block="+to_string(o.Int("block",128))+" tied="+to_string(o.Int("tied",0))+" mlp="+to_string(o.Int("mlp",4));
+		const GptConfig c = Config(vocab,o);
+		_desc = "gpt n_embd="+to_string(c.embd)+" n_head="+to_string(c.heads)+" n_layer="+to_string(c.layers)+" block="+to_string(c.block)
+			+" mlp="+to_string(c.mlpMult)+" tied="+to_string(c.tied)+" rope="+to_string(c.rope)+" act="+(c.relu2?"relu2":"gelu")+" zero_proj="+to_string(c.zeroProj);
+	}
+	Model& Net() override { return _net; }
+	int ContextLength() const override { return _net.ContextLength(); }
+	TensorPtr Logits(const TensorPtr& x) override { return _net.Forward(x); }
+	TensorPtr Loss(const TensorPtr& x,const TensorPtr& y) override { return op::CrossEntropy(_net.Forward(x),y); }
+	string Describe() const override { return _desc; }
+};
+
+
+// Character LSTM built from the fused LSTM kernel.
+class LstmModel : public LanguageModel
+{
+	LstmNet	_net;
+	string	_desc;
+public:
+	LstmModel(const int vocab,const Options& o) :
+		_net(vocab,o.Int("n_embd",64),o.Int("hidden",256),o.Int("n_layer",1),o.Int("block",128),o.Int("init_seed",1))
+	{
+		_desc = "lstm n_embd="+to_string(o.Int("n_embd",64))+" hidden="+to_string(o.Int("hidden",256))+" n_layer="+to_string(o.Int("n_layer",1))
+			+" block="+to_string(o.Int("block",128));
 	}
 	Model& Net() override { return _net; }
 	int ContextLength() const override { return _net.ContextLength(); }
@@ -188,6 +228,8 @@ unique_ptr<LanguageModel> MakeModel(const int vocab,const Options& o)
 		return make_unique<TutorialModel>(vocab,o);
 	if(name=="gpt")
 		return make_unique<GptModel>(vocab,o);
+	if(name=="lstm")
+		return make_unique<LstmModel>(vocab,o);
 	throw runtime_error("Unknown model '"+name+"'.");
 }
 
@@ -331,6 +373,33 @@ string Sample(LanguageModel& lm,const Dataset& ds,const int n,mt19937& gen,const
 }
 
 
+// Scales all gradients so their combined L2 norm is at most maxNorm. Returns the norm before clipping.
+double ClipGlobalNorm(const vector<TensorPtr>& params,const double maxNorm)
+{
+	double sq = 0.0;
+	for(auto& p:params)
+		if(p->Gradient())
+		{
+			const FP* g = p->Gradient()->Data().Raw();
+			for(int i=0,n=p->Data().Size();i<n;++i)
+				sq += double(g[i])*g[i];
+		}
+	const double norm = sqrt(sq);
+	if(maxNorm>0.0&&norm>maxNorm)
+	{
+		const FP scale = FP(maxNorm/norm);
+		for(auto& p:params)
+			if(p->Gradient())
+			{
+				FP* g = p->Gradient()->Data().Raw();
+				for(int i=0,n=p->Data().Size();i<n;++i)
+					g[i] *= scale;
+			}
+	}
+	return norm;
+}
+
+
 int Train(const Dataset& ds,const Options& o,const bool profile)
 {
 	auto lm = MakeModel(ds.VocabSize(),o);
@@ -344,9 +413,42 @@ int Train(const Dataset& ds,const Options& o,const bool profile)
 	const string logName = o.Str("log","");
 
 	cout<<"model: "<<lm->Describe()<<endl;
-	cout<<"parameters: "<<CountParameters(lm->Net())<<"  batch="<<B<<" T="<<T<<" lr="<<lr<<" budget="<<budget<<"s"<<endl;
+	cout<<"parameters: "<<CountParameters(lm->Net())<<"  batch="<<B<<" T="<<T<<" lr="<<lr<<" schedule="<<o.Str("schedule","const")
+		<<" warmup="<<o.Int("warmup",0)<<" wd="<<o.Dbl("wd",0.0)<<" clip="<<o.Dbl("clip",0.0)<<" opt="<<o.Str("opt","adam")<<(o.Str("opt","adam")=="muon"?" muon_lr="+to_string(o.Dbl("muon_lr",0.02)):"")<<" budget="<<budget<<"s"<<endl;
 
-	ADAM opt(lm->Net().GetParameters(),FP(lr));
+	const vector<TensorPtr> params = lm->Net().GetParameters();
+	const double clip = o.Dbl("clip",0.0);
+
+	// --opt muon: hidden 2D weight matrices use Muon; embeddings, head, biases and gains use Adam.
+	const bool useMuon = o.Str("opt","adam")=="muon";
+	const double muonLr = o.Dbl("muon_lr",0.02);
+	vector<TensorPtr> adamParams,muonParams;
+	for(auto& p:params)
+	{
+		const string& n = p->Name();
+		const bool hidden = p->Shape().size()==2&&n!="tok"&&n!="pos"&&n!="head.W";
+		(useMuon&&hidden?muonParams:adamParams).push_back(p);
+	}
+	unique_ptr<Muon> muon;
+	if(!muonParams.empty())
+		muon = make_unique<Muon>(muonParams,FP(muonLr));
+	ADAM opt(adamParams,FP(lr));
+	opt.weightDecay = FP(o.Dbl("wd",0.0));
+	const int warmup = o.Int("warmup",0);					// Linear warmup iterations.
+	const string schedule = o.Str("schedule","const");		// const | cosine | linear (decay over the time budget).
+	const double minFrac = o.Dbl("min_lr",0.1);				// Final LR as a fraction of the peak.
+	auto lrAt = [&](const int it,const double seconds)
+	{
+		double f = 1.0;
+		const double progress = min(1.0,seconds/budget);
+		if(schedule=="cosine")
+			f = minFrac+(1.0-minFrac)*0.5*(1.0+cos(3.14159265358979*progress));
+		else if(schedule=="linear")
+			f = 1.0-(1.0-minFrac)*progress;
+		if(warmup>0&&it<warmup)
+			f *= double(it+1)/warmup;
+		return lr*f;
+	};
 	ofstream log;
 	if(!logName.empty())
 	{
@@ -392,7 +494,16 @@ int Train(const Dataset& ds,const Options& o,const bool profile)
 		}
 		{
 			Profiler::Scope s(Profiler::Enabled()?"~step.optimizer":nullptr);
+			if(clip>0.0)
+				ClipGlobalNorm(params,clip);
+			const double f = lrAt(iter,trainSeconds)/lr;
+			opt.SetLearningRate(FP(lr*f));
 			opt.Step();
+			if(muon)
+			{
+				muon->SetLearningRate(FP(muonLr*f));
+				muon->Step();
+			}
 		}
 		const double dt = chrono::duration<double>(chrono::steady_clock::now()-start).count();
 		trainSeconds += dt;
