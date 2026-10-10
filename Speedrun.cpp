@@ -590,6 +590,36 @@ int DevCheck(const Dataset& ds,const Options& o)
 }
 
 
+#ifdef AUTOGRAD_CUDA
+// GPU GEMM throughput on typical shapes (M,N,K, transA, transB).
+int GpuGemmBench()
+{
+	const int shapes[][5] = {{4096,4096,4096,0,0},{16384,1152,384,0,0},{16384,384,1536,0,0},{384,1536,16384,1,0},{16384,384,1536,0,1},{64,4096,1024,0,0}};
+	for(auto& sh:shapes)
+	{
+		const int M = sh[0],N = sh[1],K = sh[2];
+		const bool ta = sh[3]!=0,tb = sh[4]!=0;
+		float* A = (float*)dev::Alloc((size_t)M*K*4);
+		float* B = (float*)dev::Alloc((size_t)K*N*4);
+		float* C = (float*)dev::Alloc((size_t)M*N*4);
+		dev::Zero(A,(size_t)M*K); dev::Zero(B,(size_t)K*N);
+		const int lda = ta?M:K,ldb = tb?K:N;
+		dev::Gemm(ta,tb,M,N,K,1.0f,A,lda,B,ldb,0.0f,C,N);
+		dev::Synchronize();
+		const int reps = 20;
+		const auto start = chrono::steady_clock::now();
+		for(int r=0;r<reps;++r)
+			dev::Gemm(ta,tb,M,N,K,1.0f,A,lda,B,ldb,0.0f,C,N);
+		dev::Synchronize();
+		const double sec = chrono::duration<double>(chrono::steady_clock::now()-start).count()/reps;
+		cout<<"gpu gemm "<<M<<"x"<<N<<"x"<<K<<(ta?" A^T":"")<<(tb?" B^T":"")<<": "<<(2.0*M*N*K/sec/1e12)<<" TFLOP/s"<<endl;
+		dev::Free(A); dev::Free(B); dev::Free(C);
+	}
+	return 0;
+}
+#endif
+
+
 // Checks the packed GEMM against the reference implementation and measures throughput.
 int GemmTest(const Options& o)
 {
@@ -653,6 +683,8 @@ int main(int argc,char** argv)
 #ifdef AUTOGRAD_CUDA
 		if(o.mode=="devcheck")
 			return DevCheck(ds,o);
+		if(o.mode=="gpugemm")
+			return GpuGemmBench();
 #endif
 		if(o.mode=="gemmtest")
 			return GemmTest(o);
