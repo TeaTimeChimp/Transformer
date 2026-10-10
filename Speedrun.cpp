@@ -427,6 +427,8 @@ int Train(const Dataset& ds,const Options& o,const bool profile)
 	const int evalBatches = o.Int("eval_batches",8);
 	const int maxIters = o.Int("iters",profile?5:INT_MAX);
 	const string logName = o.Str("log","");
+	const double target = o.Dbl("target",0.0);			// Stop as soon as validation loss reaches this.
+	bool reached = false;
 
 	cout<<"model: "<<lm->Describe()<<endl;
 	cout<<"parameters: "<<CountParameters(lm->Net())<<"  batch="<<B<<" T="<<T<<" lr="<<lr<<" schedule="<<o.Str("schedule","const")
@@ -488,8 +490,13 @@ int Train(const Dataset& ds,const Options& o,const bool profile)
 			if(log.is_open())
 				log<<iter<<","<<trainSeconds<<","<<tokens<<","<<emaLoss<<","<<val<<endl;
 			nextEval += evalEvery;
+			if(target>0.0&&val<=target)
+			{
+				cout<<"TARGET "<<target<<" reached at t="<<fixed<<setprecision(1)<<trainSeconds<<"s (iter "<<iter<<")"<<defaultfloat<<endl;
+				reached = true;
+			}
 		}
-		if(trainSeconds>=budget||iter>=maxIters)
+		if(trainSeconds>=budget||iter>=maxIters||reached)
 			break;
 
 		auto [x,y] = Dataset::Batch(ds.train,B,T,gen);
