@@ -31,8 +31,12 @@ public:
 
 	const Tensors Forward(const TensorPtr& x) const override
 	{
-		TensorPtr xmean = x->Mean(1,true);
-		TensorPtr xvar = x->Var(1,true,0);	// Bessel correction=0 else produces NaN for dimension length 1.
+		// Normalise each token's feature vector, i.e. over the last (channel) dimension.
+		// Using dim 1 on a (B,T,C) input normalised over time instead, mixing statistics from future tokens into every position.
+		// Note: Mean(-1,...) can't be used because KoMean treats -1 as "mean of everything".
+		const int dim = (int)x->Shape().size()-1;
+		TensorPtr xmean = x->Mean(dim,true);
+		TensorPtr xvar = x->Var(dim,true,0);	// Bessel correction=0 (biased variance), as PyTorch's LayerNorm.
 		TensorPtr xhat = x->Sub(xmean)->Div(xvar->Add(_eps)->Sqrt());
 		TensorPtr out = _gamma->Mul(xhat)->Add(_beta);
 		return out;
