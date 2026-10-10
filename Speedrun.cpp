@@ -181,6 +181,7 @@ class GptModel : public LanguageModel
 		c.rope = o.Int("rope",0)!=0;
 		c.relu2 = o.Str("act","gelu")=="relu2";
 		c.zeroProj = o.Int("zero_proj",0)!=0;
+		c.dropout = FP(o.Dbl("dropout",0.0));
 		c.seed = o.Int("init_seed",1);
 		return c;
 	}
@@ -191,7 +192,7 @@ public:
 	{
 		const GptConfig c = Config(vocab,o);
 		_desc = "gpt n_embd="+to_string(c.embd)+" n_head="+to_string(c.heads)+" n_layer="+to_string(c.layers)+" block="+to_string(c.block)
-			+" mlp="+to_string(c.mlpMult)+" tied="+to_string(c.tied)+" rope="+to_string(c.rope)+" act="+(c.relu2?"relu2":"gelu")+" zero_proj="+to_string(c.zeroProj);
+			+" mlp="+to_string(c.mlpMult)+" tied="+to_string(c.tied)+" rope="+to_string(c.rope)+" act="+(c.relu2?"relu2":"gelu")+" zero_proj="+to_string(c.zeroProj)+" dropout="+to_string(c.dropout);
 	}
 	Model& Net() override { return _net; }
 	int ContextLength() const override { return _net.ContextLength(); }
@@ -208,10 +209,10 @@ class LstmModel : public LanguageModel
 	string	_desc;
 public:
 	LstmModel(const int vocab,const Options& o) :
-		_net(vocab,o.Int("n_embd",64),o.Int("hidden",256),o.Int("n_layer",1),o.Int("block",128),o.Int("init_seed",1))
+		_net(vocab,o.Int("n_embd",64),o.Int("hidden",256),o.Int("n_layer",1),o.Int("block",128),o.Int("init_seed",1),FP(o.Dbl("dropout",0.0)))
 	{
 		_desc = "lstm n_embd="+to_string(o.Int("n_embd",64))+" hidden="+to_string(o.Int("hidden",256))+" n_layer="+to_string(o.Int("n_layer",1))
-			+" block="+to_string(o.Int("block",128));
+			+" block="+to_string(o.Int("block",128))+" dropout="+to_string(o.Dbl("dropout",0.0));
 	}
 	Model& Net() override { return _net; }
 	int ContextLength() const override { return _net.ContextLength(); }
@@ -554,6 +555,7 @@ int DevCheck(const Dataset& ds,const Options& o)
 	for(int d=0;d<2;++d)
 	{
 		NDConfig::useGpu = d==1;
+		op::DropoutSeed() = 12345;	// Same dropout masks on both devices.
 		auto lm = MakeModel(ds.VocabSize(),o);
 		lm->Net().SetMode(Layer::Mode::Training);
 		TensorPtr l = lm->Loss(x,y);

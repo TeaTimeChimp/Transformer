@@ -5,6 +5,7 @@
 #include "..\AutoGrad\KoFused.h"
 #include "..\AutoGrad\Model.h"
 #include <random>
+#include <atomic>
 
 
 // Graph helpers - each creates one node backed by a fused kernel.
@@ -57,6 +58,21 @@ namespace op
 		if(pos)
 			return Tensor::New(true,{tok,pos},std::make_shared<KoEmbedding>(idx->Data()));
 		return Tensor::New(true,{tok},std::make_shared<KoEmbedding>(idx->Data()));
+	}
+
+	inline std::atomic<unsigned>& DropoutSeed()
+	{
+		static std::atomic<unsigned> counter = 12345;
+		return counter;
+	}
+
+	// Inverted dropout; each call draws a fresh mask seed.
+	inline TensorPtr Dropout(const TensorPtr& x,const FP p)
+	{
+		std::atomic<unsigned>& counter = DropoutSeed();
+		if(p<=FP(0))
+			return x;
+		return Tensor::New(true,{x},std::make_shared<KoDropoutHashed>(p,counter.fetch_add(0x9E3779B9u)));
 	}
 
 	inline TensorPtr CrossEntropy(const TensorPtr& logits,const TensorPtr& targets)
@@ -130,6 +146,7 @@ struct GptConfig
 	bool	rope = false;			// Rotary position embeddings instead of a learned position table.
 	bool	relu2 = false;			// ReLU^2 MLP activation instead of GELU.
 	bool	zeroProj = false;		// Zero-initialise residual output projections (each block starts as identity).
+	FP		dropout = 0;			// Dropout on the embedding and each residual branch (training only).
 	int		seed = 1;
 };
 
@@ -147,8 +164,20 @@ class GptNet : public Model
 	const GptConfig		_c;
 	TensorPtr			_tok,_pos,_lnfg,_lnfb,_head,_headb;
 	std::vector<Layer_>	_blocks;
+	bool				_training = false;
+
+	TensorPtr Drop(const TensorPtr& x) const
+	{
+		return _training?op::Dropout(x,_c.dropout):x;
+	}
 
 public:
+	void SetMode(const Layer::Mode mode) override
+	{
+		_training = mode==Layer::Mode::Training;
+		Model::SetMode(mode);
+	}
+
 	GptNet(const GptConfig& c) :
 		_p(std::make_shared<ParameterSet>()),
 		_c(c)
@@ -200,18 +229,18 @@ public:
 	{
 		const int T = idx->Shape()[1];
 		_ASSERT(T<=_c.block);
-		TensorPtr x = op::Embedding(_tok,_pos,idx);									// (B,T,C) token (+ position)
+		TensorPtr x = Drop(op::Embedding(_tok,_pos,idx));							// (B,T,C) token (+ position)
 		for(const Layer_& b:_blocks)
 		{
 			TensorPtr h = op::LayerNorm(x,b.ln1g,b.ln1b);
 			h = op::Linear(h,b.Wqkv,b.bqkv);										// (B,T,3C)
 			h = op::CausalAttention(h,_c.heads,_c.rope);							// (B,T,C)
-			h = op::Linear(h,b.Wproj,b.bproj);
+			h = Drop(op::Linear(h,b.Wproj,b.bproj));
 			x = op::Add(x,h);
 			h = op::LayerNorm(x,b.ln2g,b.ln2b);
 			h = op::Linear(h,b.Wfc,b.bfc);
 			h = _c.relu2?op::Relu2(h):op::Gelu(h);
-			h = op::Linear(h,b.Wout,b.bout);
+			h = Drop(op::Linear(h,b.Wout,b.bout));
 			x = op::Add(x,h);
 		}
 		x = op::LayerNorm(x,_lnfg,_lnfb);
@@ -232,13 +261,22 @@ class LstmNet : public Model
 
 	ParameterSetPtr		_p;
 	const int			_context;
+	const FP			_dropout;
 	TensorPtr			_tok,_head,_headb;
 	std::vector<Layer_>	_layers;
+	bool				_training = false;
 
 public:
-	LstmNet(const int vocab,const int embd,const int hidden,const int layers,const int context,const int seed) :
+	void SetMode(const Layer::Mode mode) override
+	{
+		_training = mode==Layer::Mode::Training;
+		Model::SetMode(mode);
+	}
+
+	LstmNet(const int vocab,const int embd,const int hidden,const int layers,const int context,const int seed,const FP dropout=0) :
 		_p(std::make_shared<ParameterSet>()),
-		_context(context)
+		_context(context),
+		_dropout(dropout)
 	{
 		std::mt19937 gen(seed);
 		_tok = _p->Normal("tok",{vocab,embd},1.0,gen);
@@ -275,7 +313,11 @@ public:
 	{
 		TensorPtr x = op::Embedding(_tok,nullptr,idx);		// (B,T,E)
 		for(const Layer_& L:_layers)
+		{
 			x = op::LSTM(x,L.Wx,L.Wh,L.b);					// (B,T,H)
+			if(_training)
+				x = op::Dropout(x,_dropout);				// Between layers and before the head.
+		}
 		return op::Linear(x,_head,_headb);					// (B,T,V)
 	}
 };

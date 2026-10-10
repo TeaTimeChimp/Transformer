@@ -56,6 +56,14 @@ is now set (and atomic) before waking.
 `(end-begin)+subRange-1/subRange` evaluates `1/subRange` first (integer 0 for subRange>1), so up to 32 tasks are
 created even when the range is smaller. The extra tasks are empty, so the result is correct, just wasteful.
 
+### Two traps in the NDArray API (not bugs as such, but easy to fall into)
+* `NDData::New({M})` with a *single* value does not make a 1-D array of length M. Overload resolution picks
+  `NDShape(const int size)`, which means "M dimensions", and its `memset` writes past the 3-element `_dims`
+  array. Use `NDData::New(NDShape{M})`. Making that constructor `explicit` would turn this into a compile error.
+* `NDArray::operator=` copies element data into the existing array (that's what makes `r->Slice({{b}}) = v`
+  work); it does not rebind the handle. So `member = NDData::New(...)` on a default-constructed member writes through
+  a null pointer. Use `member._Attach(...)` to rebind, as KoCrossEntropy does.
+
 ### Not a bug: the autograd itself is right
 In double precision, every parameter gradient of the tutorial model matches finite differences to ~1e-9 relative
 error. The float32 check looks alarming (errors of 10-40%) only because a central difference with eps=1e-2 on a
