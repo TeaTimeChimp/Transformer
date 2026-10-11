@@ -259,6 +259,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Data\input.txt" />
+    <Text Include="Data\test-input.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\AutoGrad\ADAM.h" />
@@ -290,6 +291,7 @@
     <ClInclude Include="..\AutoGrad\KoSub.h" />
     <ClInclude Include="..\AutoGrad\KoSum.h" />
     <ClInclude Include="..\AutoGrad\KoTranspose.h" />
+    <ClInclude Include="..\AutoGrad\LayerNorm.h" />
     <ClInclude Include="..\AutoGrad\Linear.h" />
     <ClInclude Include="..\AutoGrad\Model.h" />
     <ClInclude Include="..\AutoGrad\NDAllocator.h" />
@@ -306,7 +308,6 @@
     <ClInclude Include="FeedForward.h" />
     <ClInclude Include="AttentionHead.h" />
     <ClInclude Include="KoNotImplemented.h" />
-    <ClInclude Include="LayerNorm.h" />
     <ClInclude Include="MultiHeadAttention.h" />
     <ClInclude Include="MultiHeadLanguageModel.h" />
   </ItemGroup>

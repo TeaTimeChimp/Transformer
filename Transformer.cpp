@@ -597,6 +597,7 @@ int main()
 
 	// Load the data set.
 	const string text = AsciiFileReader("Data\\input.txt");
+	//const string text = AsciiFileReader("Data\\test-input.txt");
 	cout<<"length of dataset in characters: "<<text.length()<<endl;
 
 	// Create a set of unique characters.

@@ -1,0 +1,10 @@
+Parrot
+Potatoe
+Cat
+Dog
+Cucumber
+Rabbit
+Orange
+Fish
+Pineapple
+Pomegranate

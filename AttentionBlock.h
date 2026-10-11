@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LayerNorm.h"
+#include "../AutoGrad/LayerNorm.h"
 
 
 typedef std::shared_ptr<class Block> BlockPtr;

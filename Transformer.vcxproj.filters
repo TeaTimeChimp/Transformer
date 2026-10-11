@@ -119,6 +119,9 @@
     <Text Include="Data\input.txt">
       <Filter>Data</Filter>
     </Text>
+    <Text Include="Data\test-input.txt">
+      <Filter>Data</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BigramLanguageModel.h">
@@ -135,9 +138,6 @@
     </ClInclude>
     <ClInclude Include="AttentionBlock.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LayerNorm.h">
-      <Filter>Header Files\Autograd</Filter>
     </ClInclude>
     <ClInclude Include="MultiHeadLanguageModel.h">
       <Filter>Header Files</Filter>
@@ -264,6 +264,9 @@
     </ClInclude>
     <ClInclude Include="..\AutoGrad\CUDA\helper_string.h">
       <Filter>Header Files\Autograd\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AutoGrad\LayerNorm.h">
+      <Filter>Header Files\Autograd</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
