@@ -1,2 +1,6 @@
 .vs
 x64
+/Transformer.vcxproj.user
+/Transformer.vcxproj.vspscc
+/Transformer.vssscc
+/vc140.pdb
