@@ -96,3 +96,61 @@ Fixes, all in AutoGrad:
   Each one is gradient-checked.
 
 Same-size model: ~1.8 s -> ~0.1 s per step.
+
+## GPU backend
+
+`--device gpu` runs every fused kernel, Adam and Muon in CUDA (AutoGrad\CUDA\DeviceKernels.cu, hand-written, no
+cuBLAS). `Speedrun devcheck` runs the same model on CPU and GPU from identical weights and compares loss and every
+gradient (agree to ~4e-7). The SGEMM reaches 13-20 TFLOP/s on the model's shapes (double-buffered 128x128 tiles,
+float4 loads, split-K for weight gradients). Karpathy's 10.7M model: ~36 ms per step.
+
+## Results (val loss on the held-out 10%; lower is better)
+
+### CPU (16-core 5950X), 3 minutes, ~1M params
+| model | val |
+|---|---|
+| tutorial-style GPT (constant LR 1e-3) | 1.729 |
+| GPT + cosine schedule + LR 3e-3 | 1.601 |
+| GPT + RoPE | 1.548 |
+| GPT + RoPE + ReLU^2 + zero-init + Muon | 1.530 |
+| LSTM 512 (constant LR 2e-3) | 1.547 |
+| LSTM 512, cosine, LR 12e-3 | 1.505 |
+| **LSTM 512 + Muon** | **1.502** |
+
+### RTX 3090, 3 minutes (mean of 4 seeds)
+| model | best val | time to 1.48 |
+|---|---|---|
+| Karpathy's exact config (10.7M, Adam 3e-4, dropout 0.2) | 1.501 (1 seed), then overfits to 1.72 | never |
+| GPT 256x6, RoPE, ReLU^2, Muon, dropout 0.3 | 1.467 +- 0.007 | 100-130 s |
+| Hybrid (LSTM front end + that GPT) | 1.457 +- 0.006 | 110-130 s |
+| LSTM 2x768, dropout 0.2 | 1.457 +- 0.010 | 70-90 s |
+| **LSTM 2x1024, dropout 0.3** | **1.448 +- 0.002** | 80-90 s |
+
+### Speedrun: time to reach val 1.48 (Karpathy's tutorial result), schedule matched to the budget
+| model | reached 1.48 |
+|---|---|
+| original tutorial code on this machine | ~days (one 12M-param step took over a minute) |
+| **LSTM 1x1024, T=128, batch 128, 45 s cosine** | **4/4 seeds, 32.5-37.5 s** |
+| GPT 192x4, Muon, RoPE, 30 s cosine | 2/4 seeds, 27.5-30 s (others stall at 1.480-1.484) |
+
+## What was learned
+
+1. **Hyperparameters before architecture.** The tutorial's constant LR of 3e-4 (fine for a long run) wastes short
+   runs. A cosine decay that ends exactly at the time budget plus a much higher peak LR was the biggest single gain.
+   The LSTM wanted ~4x the GPT's learning rate and was badly "LR-starved" at 2e-3.
+2. **Muon beats Adam** for hidden weight matrices (orthogonalised momentum: every direction gets the same step
+   size). On the GPU it is nearly free once same-shaped matrices are batched.
+3. **RoPE beats learned position embeddings** when training is short; the learned table is slow to train. (With
+   Muon the gain mostly disappears: Muon learns the position table fast enough.)
+4. **Your LSTM intuition holds at this scale.** At ~1M characters and minutes of compute, the LSTM learns faster and
+   generalises slightly better than a tuned transformer, on CPU *and* GPU. The recurrence's built-in sense of order and
+   locality is the right inductive bias for character-level text. The transformer's advantages (parallelism over long
+   sequences, scaling with data) don't come into play: the dataset is only 1M characters and the GPU's per-step GEMMs
+   (batch 64 x 4096 gates) are large enough that the LSTM's sequential timesteps don't starve it.
+5. **On the GPU the limit is data, not compute.** A 3090 sees the whole training set every ~2 seconds. Every model
+   overfits within 1-2 minutes, so dropout (0.2-0.3), model size and stopping at the right time matter more than raw
+   speed. Muon makes this worse: it learns the training set so quickly that the LSTM reached a train loss of 0.65
+   (memorisation) while validation got steadily worse.
+6. Depth costs time: 3-layer LSTMs and wide GPTs were too slow per step to pay off within minutes.
+
+Raw logs live in `runs/` (git-ignored locally); `runs/analyse.py` summarises them.
